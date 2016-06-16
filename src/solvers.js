@@ -52,37 +52,7 @@ window.findNQueensSolution = function(n) {
     }
   }
 
-  // var timeCapsule = {
-  //   0:{
-  //     col: 0,
-  //     row: 0,
-  //     solution: { Board };
-  //   },
-
-  //   1: {
-  //     col: 2,
-  //     row, 1,
-  //     solution; { Board };
-  //   },
-
-  //   2: {
-  //     col: 4,
-  //     row, 2,
-  //     solution; { Board };
-  //   },
-
-  //   1: {
-  //     col: 2,
-  //     row, 1,
-  //     solution; { Board };
-  //   },
-  //   ...
-
-  //   5: {
-  //     index: 12,
-  //     solution: {Board},
-  //   }
-  // };
+  var timeCapsule = [];
 
   //some kind of loop /recursive thingy
     //if i get to the end and pieceCount !== n then...
@@ -93,15 +63,53 @@ window.findNQueensSolution = function(n) {
         //if i get to the end and still no solutions then
           // solution = 2 timeCapsules ago;
 
-  var getSolution = function(start) {
+  var getSolution = function(index) {
+    if (index < allPositions.length) {
+      for (var i = index; i < allPositions.length; i++) {
+        var row = allPositions[i][0];
+        var col = allPositions[i][1];
+        solution.togglePiece(row, col);
+        if (solution.hasRowConflictAt(row) || solution.hasColConflictAt(col) || solution.hasMinorDiagonalConflictAt(solution._getFirstRowColumnIndexForMinorDiagonalOn(row, col)) || solution.hasMajorDiagonalConflictAt(solution._getFirstRowColumnIndexForMajorDiagonalOn(row, col))) {
+          solution.togglePiece(row, col);
+        } else {
+          solution.togglePiece(row, col);
+          var pieceCount = solution.getPieceCount(); //because the toggle above causes getPieceCount to return one fewer than is actually on the board
+          timeCapsule[pieceCount] = {
+            index: i,
+            board: solution,
+            reset: false
+          };
+          solution.togglePiece(row, col);
+          if (solution.getPieceCount() === n) {
+            return;
+          }
+        }
+      }
+      if (solution.getPieceCount() < n) {
+        var queenCount = solution.getPieceCount();
+        debugger;
+        var lastPieceIndex = timeCapsule[queenCount - 1].index;
+        var hasBeenReset = timeCapsule[queenCount - 1].reset;
+        if (lastPieceIndex === ((n * n) - 1) || hasBeenReset) {
+          timeCapsule.pop();
+          queenCount--;
+          if (queenCount < 0) {
+            return;
+          }
+          //debugger;
+          lastPieceIndex = timeCapsule[queenCount - 1].index;
+        }
+        solution = timeCapsule[queenCount - 1].board;
+        timeCapsule[queenCount - 1].reset = true;
+        getSolution(lastPieceIndex + 1);
+      }
+    }
+  };
+
+/*  var getSolution = function(start) {
     if (start < n) {  //check in range        
       console.log(solution);
       solution.togglePiece(0, start);
-      //for (..iterate through allSolutions) {
-        col = allPositions[i][1];
-        row = allPositions[i][0];
-      }
-
       for (var row = 0; row < n; row++) {
         for (var col = 0; col < n; col++) {
           if (!(col === start)) {
@@ -119,7 +127,7 @@ window.findNQueensSolution = function(n) {
         getSolution(start + 1);
       }
     }
-  };
+  };*/
   getSolution(0);
   var endBoard = solution.makeArrayFromAttributes();
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(endBoard));
