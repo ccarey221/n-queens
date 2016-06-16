@@ -18,6 +18,12 @@
       }
     },
 
+    _pieceCount: 0,
+
+    getPieceCount: function() {
+      return this._pieceCount;
+    },
+
     rows: function() {
       return _(_.range(this.get('n'))).map(function(rowIndex) {
         return this.get(rowIndex);
@@ -26,6 +32,11 @@
 
     togglePiece: function(rowIndex, colIndex) {
       this.get(rowIndex)[colIndex] = + !this.get(rowIndex)[colIndex];
+      if (this.get(rowIndex)[colIndex] === 0) {
+        this._pieceCount--;
+      } else {
+        this._pieceCount++;
+      }
       this.trigger('change');
     },
 
@@ -94,8 +105,7 @@
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      var hasConflict = [];
-      var len = this.get(0).length;
+      var len = this.attributes.n;
       for (var row = 0; row < len; row++) {
         if (this.hasRowConflictAt(row)) {
           return true;
@@ -125,8 +135,7 @@
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      var hasConflict = [];
-      var len = this.get(0).length;
+      var len = this.attributes.n;
       for (var col = 0; col < len; col++) {
         //hasConflict.push(this.hasColConflictAt(col));
         if (this.hasColConflictAt(col)) {
@@ -162,8 +171,7 @@
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
-      var hasConflict = [];
-      for (var col = (0 - this.get(0).length/2); col < this.get(0).length; col++) {
+      for (var col = (0 - this.attributes.n/2); col < this.attributes.n; col++) {
         if (this.hasMajorDiagonalConflictAt(col)) {
           return true;
         }
@@ -198,12 +206,21 @@
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
       var hasConflict = [];
-      for (var col = (this.get(0).length + this.get(0).length/2); col > 0; col--) {
+      for (var col = (this.attributes.n + this.attributes.n/2); col > 0; col--) {
         if (this.hasMinorDiagonalConflictAt(col)) {
           return true;
         }
       }
       return false;
+    },
+
+    makeArrayFromAttributes: function() {
+      var toReturn = [];
+      var attributes = this.attributes;
+      for (var i = 0; i < attributes.n; i++) {
+        toReturn.push(attributes[i]);
+      }
+      return toReturn;
     }
 
     /*--------------------  End of Helper Functions  ---------------------*/
